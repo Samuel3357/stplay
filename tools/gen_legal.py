@@ -4,9 +4,9 @@ Preencha as constantes abaixo e rode:  python3 tools/gen_legal.py
 Os textos são um MODELO: peça revisão a um advogado antes de publicar."""
 import html, pathlib, sys
 
-RESPONSAVEL = "SamTech"
-EMAIL = "reizindofogo@gmail.com"
-SITE = "https://stplay.vercel.app"
+RESPONSAVEL = "[NOME DO RESPONSÁVEL / EMPRESA]"
+EMAIL = "[E-MAIL DE CONTATO]"
+SITE = "[URL DO SITE NO VERCEL]"
 FORO = "Brasil"
 DATA = "15/10/2026"
 VERSAO = "1.0"
@@ -26,11 +26,11 @@ DOCS = {
  ]),
  "privacidade": ("pt", "Política de Privacidade", [
   ("1. Resumo", ["O ST PLAY não usa anúncios, não faz rastreamento e não vende dados."]),
-  ("2. Dados que ficam só no seu aparelho", ["Histórico, favoritos, posições de reprodução e configurações ficam armazenados localmente no aparelho e não são enviados para nós."]),
-  ("3. Sua lista (vinculação pelo celular)", ["Quando você usa o QR code, a lista que você informa (link M3U ou servidor, usuário e senha Xtream) é enviada ao nosso servidor, guardada CRIPTOGRAFADA (AES-256-GCM) e ligada apenas ao identificador do seu aparelho (em forma de hash). Ela é mantida até você removê-la, na TV (Configurações) ou no site (aba Minha lista), e serve para a lista voltar sozinha se você reinstalar o app.", "Somente o seu aparelho consegue recuperar a lista. Não registramos o conteúdo (links, usuários ou senhas) em logs e não acessamos o endereço da sua lista."]),
+  ("2. Dados que ficam só no seu aparelho", ["Suas listas (inclusive usuário e senha do Xtream), histórico, favoritos e configurações ficam armazenados localmente no aparelho e não são enviados para nós."]),
+  ("3. Vinculação de lista pelo celular", ["Quando você usa o QR code, a lista enviada passa pelo nosso servidor apenas para chegar à TV: é criptografada, guardada por no máximo 15 minutos e apagada assim que a TV a recebe. Não registramos o conteúdo (links, usuários ou senhas) em logs."]),
   ("4. Teste grátis", [f"Para controlar os {TRIAL} dias de teste, guardamos um identificador do aparelho em forma irreversível (hash) e a data de início. Não guardamos seu nome, e-mail ou o identificador bruto."]),
   ("5. Segurança e provedores", ["Usamos HTTPS e limites de tentativas por endereço IP (contadores temporários). O site é hospedado na Vercel, que pode manter registros técnicos de acesso (como IP) conforme a política dela. As compras são processadas pela Roku; não recebemos dados de pagamento."]),
-  ("6. Seus direitos (LGPD)", [f"Você pode apagar sua lista a qualquer momento (TV ou site) e pedir informações ou a exclusão dos dados do teste grátis escrevendo para {EMAIL}."]),
+  ("6. Seus direitos (LGPD)", [f"Você pode pedir informações ou a exclusão dos dados do teste grátis escrevendo para {EMAIL}. Remover a lista do aparelho apaga os dados locais."]),
   ("7. Crianças", ["O app não é direcionado a crianças."]),
   ("8. Contato", [f"{RESPONSAVEL} — {EMAIL}"]),
  ]),
@@ -46,11 +46,11 @@ DOCS = {
  ]),
  "privacy": ("en", "Privacy Policy", [
   ("1. Summary", ["ST PLAY has no ads, no tracking and does not sell data."]),
-  ("2. Data that stays on your device", ["History, favorites, playback positions and settings are stored locally on the device and are not sent to us."]),
-  ("3. Your playlist (pairing from your phone)", ["When you use the QR code, the playlist you enter (M3U link, or Xtream server, username and password) is sent to our server, stored ENCRYPTED (AES-256-GCM) and tied only to your device identifier (as a hash). It is kept until you remove it, on the TV (Settings) or on the website (My playlist tab), so that it comes back by itself if you reinstall the app.", "Only your device can retrieve the playlist. We do not log its contents (links, usernames or passwords) and we never access your playlist address."]),
+  ("2. Data that stays on your device", ["Your playlists (including Xtream username and password), history, favorites and settings are stored locally on the device and are not sent to us."]),
+  ("3. Pairing a playlist from your phone", ["When you use the QR code, the playlist passes through our server only to reach the TV: it is encrypted, kept for at most 15 minutes and deleted as soon as the TV receives it. We do not log its contents (links, usernames or passwords)."]),
   ("4. Free trial", [f"To enforce the {TRIAL}-day trial we store an irreversible hash of a device identifier and the start date. We do not store your name, email or the raw identifier."]),
   ("5. Security and providers", ["We use HTTPS and per-IP rate limits (temporary counters). The site is hosted on Vercel, which may keep technical access logs (such as IP) under its own policy. Purchases are processed by Roku; we receive no payment data."]),
-  ("6. Your rights", [f"You can delete your playlist at any time (TV or website) and request information or deletion of trial data by writing to {EMAIL}."]),
+  ("6. Your rights", [f"You may request information or deletion of trial data by writing to {EMAIL}. Removing the playlist from the device erases local data."]),
   ("7. Children", ["The app is not directed to children."]),
   ("8. Contact", [f"{RESPONSAVEL} — {EMAIL}"]),
  ]),
@@ -63,7 +63,7 @@ roku = root / "generated_roku_assets"
 roku.mkdir(exist_ok=True)
 for slug, (lang, title, secs) in DOCS.items():
     body = "".join(f"<h2>{html.escape(h)}</h2><ul>" + "".join(f"<li>{html.escape(p)}</li>" for p in ps) + "</ul>" for h, ps in secs)
-    page = f"""<!doctype html><html lang="{lang}"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>ST PLAY — {title}</title><link rel="icon" type="image/png" href="/favicon.png"><link rel="stylesheet" href="/style.css"></head><body><main class="legal"><a class="brand" href="/"><img src="/favicon.png" alt="" width="40" height="40">ST <b>PLAY</b></a><h1>{title}</h1><p class="mut">{'Versão' if lang=='pt' else 'Version'} {VERSAO} · {DATA}</p>{body}<footer><a href="/{OTHER[slug]}.html">{'English' if lang=='pt' else 'Português'}</a></footer></main></body></html>"""
+    page = f"""<!doctype html><html lang="{lang}"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>ST PLAY — {title}</title><link rel="stylesheet" href="/style.css"></head><body><main class="legal"><a class="brand" href="/" style="text-decoration:none;color:inherit">ST <b>PLAY</b></a><h1>{title}</h1><p class="mut">{'Versão' if lang=='pt' else 'Version'} {VERSAO} · {DATA}</p>{body}<footer><a href="/{OTHER[slug]}.html">{'English' if lang=='pt' else 'Português'}</a></footer></main></body></html>"""
     (pub / f"{slug}.html").write_text(page, encoding="utf-8")
     txt = f"{title} - ST PLAY (v{VERSAO}, {DATA})\n\n" + "\n\n".join(h + "\n" + "\n".join("- " + p for p in ps) for h, ps in secs)
     (roku / f"{slug}.txt").write_text(txt, encoding="utf-8")

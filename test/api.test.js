@@ -88,48 +88,30 @@ test('QR em PNG para o site com o código', async () => {
 });
 
 
-const info = (await import('../api/pair-info.js')).default;
-const premove = (await import('../api/pair-remove.js')).default;
-const dlist = (await import('../api/device/list.js')).default;
-const dremove = (await import('../api/device/remove.js')).default;
-
-test('lista fica salva só para o aparelho dono e sobrevive à entrega', async () => {
-  const { code } = (await call(register, { body: { deviceId: DEV } })).body;
-  await call(pair, { body: { code, type: 'xtream', server: 'http://srv.com:8080', username: 'u', password: 'segredo', name: 'Casa' } });
-  assert.equal((await call(poll, { method: 'GET', query: { deviceId: DEV, code } })).body.status, 'ready');
-  // continua salva depois da entrega
-  const mine = await call(dlist, { body: { deviceId: DEV } });
-  assert.equal(mine.body.playlist.password, 'segredo');
-  // outro aparelho não recebe nada
-  const other = await call(dlist, { body: { deviceId: 'OTHERDEVICE0123456789ABCDEF012345' } });
-  assert.equal(other.body.playlist, null);
+test('compatibilidade: POST Roku com corpo JSON em texto ou Buffer', async () => {
+  const small = '0123456789abcdef';
+  const a = await call(trial, { body: JSON.stringify({ deviceId: small }) });
+  assert.equal(a.status, 200);
+  const b = await call(trial, { body: Buffer.from(JSON.stringify({ deviceId: small })) });
+  assert.equal(b.status, 200);
+  assert.equal(b.body.startedAt, a.body.startedAt);
 });
 
-test('"minha lista": informa sem senha e remove', async () => {
-  const { code } = (await call(register, { body: { deviceId: DEV } })).body;
-  await call(pair, { body: { code, type: 'xtream', server: 'http://srv.com:8080', username: 'u', password: 'segredo', name: 'Casa' } });
-  const { code: code2 } = (await call(register, { body: { deviceId: DEV } })).body;
-  const i = await call(info, { body: { code: code2 } });
-  assert.deepEqual(i.body, { has: true, type: 'xtream', name: 'Casa', host: 'srv.com:8080' });
-  assert.ok(!JSON.stringify(i.body).includes('segredo'));
-  assert.equal((await call(premove, { body: { code: code2 } })).status, 200);
-  assert.equal((await call(dlist, { body: { deviceId: DEV } })).body.playlist, null);
-  assert.equal((await call(info, { body: { code: 'ZZZZZZ' } })).status, 404);
+test('compatibilidade: chaves JSON com capitalizacao alternativa', async () => {
+  const small = '0123456789abcdef';
+  const a = await call(trial, { body: { deviceid: small } });
+  assert.equal(a.status, 200);
+  const b = await call(register, { body: { DEVICEID: small } });
+  assert.equal(b.status, 200);
+  assert.equal((await call(poll, { method: 'GET', query: { deviceId: small, code: b.body.code } })).body.status, 'waiting');
 });
 
-test('TV remove a própria lista', async () => {
-  const { code } = (await call(register, { body: { deviceId: DEV } })).body;
-  await call(pair, { body: { code, type: 'm3u', url: 'https://a.com/l.m3u' } });
-  await call(dremove, { body: { deviceId: DEV } });
-  assert.equal((await call(dlist, { body: { deviceId: DEV } })).body.playlist, null);
-});
-
-test('acesso livre só para a referência configurada', async () => {
-  const t1 = (await call(trial, { body: { deviceId: DEV } })).body;
-  assert.equal(t1.free, false);
-  assert.match(t1.ref, /^[0-9a-f]{10}$/);
-  process.env.FREE_DEVICES = `abc, ${t1.ref}`;
-  assert.equal((await call(trial, { body: { deviceId: DEV } })).body.free, true);
-  assert.equal((await call(trial, { body: { deviceId: 'OTHERDEVICE0123456789ABCDEF012345' } })).body.free, false);
-  delete process.env.FREE_DEVICES;
+test('400 explica o formato, sem expor identificador do aparelho', async () => {
+  const missing = await call(trial, { body: '{JSON errado' });
+  assert.equal(missing.status, 400);
+  assert.equal(missing.body.code, 'missing_device_id');
+  const invalid = await call(trial, { body: { deviceId: 'abc defghijklmnop' } });
+  assert.equal(invalid.status, 400);
+  assert.equal(invalid.body.code, 'invalid_device_id_format');
+  assert.equal(JSON.stringify(invalid.body).includes('abc defghijklmnop'), false);
 });

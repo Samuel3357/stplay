@@ -1,5 +1,5 @@
 import { store } from '../_lib/store.js';
-import { CODE_TTL_SEC, clientIp, hashDevice, isDeviceId, newCode, send } from '../_lib/util.js';
+import { CODE_TTL_SEC, clientIp, hashDevice, isDeviceId, requestDeviceId, invalidDeviceResponse, newCode, send } from '../_lib/util.js';
 
 /** A TV pede um código de vinculação. Corpo: { deviceId } */
 export default async function handler(req, res) {
@@ -7,8 +7,8 @@ export default async function handler(req, res) {
   try {
     const ip = clientIp(req);
     if ((await store.hit(`rl:reg:${ip}`, 60)) > 20) return send(res, 429, { error: 'Muitas tentativas. Aguarde um minuto.' });
-    const deviceId = req.body?.deviceId;
-    if (!isDeviceId(deviceId)) return send(res, 400, { error: 'ID de dispositivo inválido.' });
+    const deviceId = requestDeviceId(req);
+    if (!isDeviceId(deviceId)) return invalidDeviceResponse(req, res);
     const dev = hashDevice(deviceId);
     for (let i = 0; i < 5; i++) {
       const code = newCode();

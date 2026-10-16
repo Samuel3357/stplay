@@ -37,6 +37,40 @@ export function decrypt(b64) {
 }
 
 export const isDeviceId = (v) => typeof v === 'string' && /^[A-Za-z0-9]{16,64}$/.test(v);
+
+/** Lê JSON já decodificado pelo Vercel ou recebido como texto/buffer.
+ * Aceita capitalizações antigas de clientes Roku, mas não muda a identidade
+ * utilizada para vinculação ou teste grátis. Nunca persiste ID bruto. */
+export function requestDeviceId(req) {
+  let body = req.body;
+  if (Buffer.isBuffer(body)) body = body.toString('utf8');
+  if (typeof body === 'string') {
+    if (body.length > 4096) return null;
+    try { body = JSON.parse(body); } catch { return null; }
+  }
+  if (!body || Array.isArray(body) || typeof body !== 'object') return null;
+  const names = Object.keys(body);
+  if (names.length > 20) return null;
+  const name = names.find((n) => n.toLowerCase() === 'deviceid' || n.toLowerCase() === 'device_id');
+  if (!name) return null;
+  const id = body[name];
+  return typeof id === 'string' ? id.trim() : null;
+}
+
+/** Exibe informações de diagnóstico sem divulgar o identificador do aparelho. */
+export function invalidDeviceResponse(req, res) {
+  const id = requestDeviceId(req);
+  const reason = id === null ? 'missing_device_id' : 'invalid_device_id_format';
+  const type = Buffer.isBuffer(req.body) ? 'buffer' : Array.isArray(req.body) ? 'array' : typeof req.body;
+  console.warn('[STPLAY] ID rejeitado', { reason, bodyType: type, idLength: id?.length ?? null });
+  return send(res, 400, {
+    error: reason === 'missing_device_id'
+      ? 'Campo deviceId ausente ou JSON invalido.'
+      : 'ID de dispositivo invalido (use 16 a 64 letras ou numeros).',
+    code: reason,
+  });
+}
+
 export const isCode = (v) => typeof v === 'string' && /^[A-Z2-9]{6}$/.test(v) && [...v].every((c) => CODE_ALPHABET.includes(c));
 
 export function clientIp(req) {
@@ -83,20 +117,3 @@ export function validatePlaylist(b) {
   }
   return bad('Escolha M3U ou Xtream.');
 }
-
-/** Referência curta (10 hex) do aparelho, segura para mostrar na TV e usar na lista de acesso livre. */
-export const deviceRef = (hash) => hash.slice(0, 10);
-
-/** Aparelhos com acesso livre (testes do dono): variável FREE_DEVICES = refs separadas por vírgula. */
-export function isFree(hash) {
-  const list = (process.env.FREE_DEVICES || '').split(',').map((x) => x.trim().toLowerCase()).filter((x) => x.length >= 10);
-  return list.some((r) => hash.startsWith(r));
-}
-
-export const hostOf = (u) => {
-  try {
-    return new URL(u).host;
-  } catch {
-    return '';
-  }
-};

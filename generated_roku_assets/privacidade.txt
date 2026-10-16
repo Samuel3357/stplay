@@ -1,0 +1,25 @@
+Política de Privacidade - ST PLAY (v1.0, 15/10/2026)
+
+1. Resumo
+- O ST PLAY não usa anúncios, não faz rastreamento e não vende dados.
+
+2. Dados que ficam só no seu aparelho
+- Suas listas (inclusive usuário e senha do Xtream), histórico, favoritos e configurações ficam armazenados localmente no aparelho e não são enviados para nós.
+
+3. Vinculação de lista pelo celular
+- Quando você usa o QR code, a lista enviada passa pelo nosso servidor apenas para chegar à TV: é criptografada, guardada por no máximo 15 minutos e apagada assim que a TV a recebe. Não registramos o conteúdo (links, usuários ou senhas) em logs.
+
+4. Teste grátis
+- Para controlar os 10 dias de teste, guardamos um identificador do aparelho em forma irreversível (hash) e a data de início. Não guardamos seu nome, e-mail ou o identificador bruto.
+
+5. Segurança e provedores
+- Usamos HTTPS e limites de tentativas por endereço IP (contadores temporários). O site é hospedado na Vercel, que pode manter registros técnicos de acesso (como IP) conforme a política dela. As compras são processadas pela Roku; não recebemos dados de pagamento.
+
+6. Seus direitos (LGPD)
+- Você pode pedir informações ou a exclusão dos dados do teste grátis escrevendo para [E-MAIL DE CONTATO]. Remover a lista do aparelho apaga os dados locais.
+
+7. Crianças
+- O app não é direcionado a crianças.
+
+8. Contato
+- [NOME DO RESPONSÁVEL / EMPRESA] — [E-MAIL DE CONTATO]
