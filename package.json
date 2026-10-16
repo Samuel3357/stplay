@@ -1,0 +1,16 @@
+{
+  "name": "stplay-cloud",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Site e API de vinculação do ST PLAY (Vercel)",
+  "scripts": {
+    "test": "node --test test/api.test.js"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "dependencies": {
+    "qrcode": "^1.5.4"
+  }
+}
